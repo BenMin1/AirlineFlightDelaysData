@@ -1,0 +1,8 @@
+SELECT
+    EXTRACT(HOUR FROM departure_time) AS hour,
+    AVG(arrival_delay) AS average_delay
+FROM flights_view fv
+where arrival_delay>=0  --takes out the cancelled already
+and extract(year from departure_time) = 2015
+GROUP BY EXTRACT(HOUR FROM departure_time)
+ORDER BY hour;
