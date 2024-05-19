@@ -1,0 +1,28 @@
+CREATE TABLE state_by_region (
+    STATE VARCHAR PRIMARY KEY,
+    REGION VARCHAR
+);
+INSERT INTO state_by_region (STATE, REGION) VALUES
+    ('CT', 'Northeast'), ('ME', 'Northeast'), ('MA', 'Northeast'), ('NH', 'Northeast'), ('RI', 'Northeast'), ('VT', 'Northeast'),
+    ('NJ', 'Northeast'), ('NY', 'Northeast'), ('PA', 'Northeast'),
+    ('DE', 'Southeast'), ('FL', 'Southeast'), ('GA', 'Southeast'), ('MD', 'Southeast'), ('NC', 'Southeast'), ('SC', 'Southeast'),
+    ('VA', 'Southeast'), ('WV', 'Southeast'), ('AL', 'Southeast'), ('KY', 'Southeast'), ('MS', 'Southeast'), ('TN', 'Southeast'),
+    ('IL', 'Midwest'), ('IN', 'Midwest'), ('MI', 'Midwest'), ('OH', 'Midwest'), ('WI', 'Midwest'), ('IA', 'Midwest'),
+    ('KS', 'Midwest'), ('MN', 'Midwest'), ('MO', 'Midwest'), ('NE', 'Midwest'), ('ND', 'Midwest'), ('SD', 'Midwest'),
+    ('AR', 'Southwest'), ('LA', 'Southwest'), ('OK', 'Southwest'), ('TX', 'Southwest'),
+    ('AZ', 'West'), ('CO', 'West'), ('ID', 'West'), ('MT', 'West'), ('NV', 'West'), ('NM', 'West'),
+    ('UT', 'West'), ('WY', 'West'), ('AK', 'West'), ('CA', 'West'), ('HI', 'West'), ('OR', 'West'), ('WA', 'West');
+  
+CREATE VIEW flight_reliability_by_region AS
+SELECT
+    state_by_region.REGION,
+    COUNT(CASE WHEN fw.flight_status = 'Cancelled' THEN 1 END) AS total_cancellations,
+    COUNT(fw.flight_status) AS total_flights,
+    AVG(fw.non_negative_arrival_delay) AS avg_arrival_delay,
+    (COUNT(CASE WHEN fw.flight_status = 'Cancelled' THEN 1 END) / COUNT(fw.flight_status)::DECIMAL) * 100 AS cancellation_rate
+FROM flights_with_delays fw
+JOIN airports a ON fw.ORIGIN_AIRPORT = a.IATA_CODE
+JOIN state_by_region sbr ON a.STATE = sbr.STATE
+GROUP BY sbr.REGION;
+SELECT *
+FROM flight_reliability_by_region;
